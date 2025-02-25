@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Surah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        .arabic-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            direction: rtl;
+        }
+        .ayah-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .audio-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="my-4">Surah</h1>
+        <div id="detail-surah" class="mb-4"></div>
+        <h3 class="my-4">Ayat-ayat</h3>
+        <div id="list-ayat"></div>
+        <div>
+            <button class="btn btn-secondary mt-3" onclick="window.history.back()">Kembali</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const nomorSurah = urlParams.get('nomor');
+
+        $.ajax({
+            url: `https://equran.id/api/v2/surat/${nomorSurah}`,
+            method: 'GET',
+            success: function(response) {
+                let surah = response.data;
+                $('#detail-surah').html(`
+                    <div>
+                        <h2>${surah.namaLatin} - ${surah.nama}</h2>
+                        <h5>${surah.arti} - ${surah.jumlahAyat} Ayat</h5>
+                    </div>
+                `);
+
+                surah.ayat.forEach(ayat => {
+                    $('#list-ayat').append(`
+                        <div class="ayah-card">
+                            <span class="badge bg-dark">${ayat.nomorAyat}</span>
+                            <h5 class="text-end arabic-text">${ayat.teksArab}</h5>
+                            <p><i>${ayat.teksLatin}</i></p>
+                            <p>${ayat.teksIndonesia}</p>
+                            <button class="audio-btn" onclick="playAudio('${ayat.audio['01']}')">
+                                <i class="fas fa-play-circle"></i>
+                            </button>
+                        </div>
+                    `);
+                });
+            },
+            error: function() {
+                alert("Gagal mengambil data!");
+            }
+        });
+
+        function playAudio(src) {
+            let audio = new Audio(src);
+            audio.play();
+        }
+    </script>
+</body>
+</html>
